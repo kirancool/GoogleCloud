@@ -1,0 +1,146 @@
+SELECT
+  *
+FROM
+  `nice-forge-338515.Bank_marketing.bank`
+LIMIT
+  1000;
+SELECT
+  deposit AS target,
+  COUNT(*) AS count
+FROM
+  `nice-forge-338515.Bank_marketing.bank`
+GROUP BY
+  deposit;
+
+CREATE OR REPLACE TABLE `nice-forge-338515.Bank_marketing.Bank_final` 
+AS
+select 
+  age,
+  job,
+  marital,
+  education,
+  'default' as default_col,
+  balance,
+  housing,
+  loan,
+  contact,
+  day,
+  month,
+  duration,
+  campaign,
+  pdays,
+  previous,
+  poutcome,
+  target,
+  CASE 
+  WHEN split_fileds <0.8 THEN 'training'
+  WHEN split_fileds = 0.8 THEN 'evaluation'
+  WHEN split_fileds > 0.8 THEN 'Prediction'
+  END as dataframe
+FROM
+(SELECT age,
+  job,
+  marital,
+  education,
+  'default',
+  balance,
+  housing,
+  loan,
+  contact,
+  day,
+  month,
+  duration,
+  campaign,
+  pdays,
+  previous,
+  poutcome,
+  deposit AS target,
+  ROUND(ABS(RAND()),1) as split_fileds
+  FROM 
+  `nice-forge-338515.Bank_marketing.bank`) ;
+
+
+  select 
+  age,
+  job,
+  marital,
+  education,
+  'default' as default_col,
+  balance,
+  housing,
+  loan,
+  contact,
+  day,
+  month,
+  duration,
+  campaign,
+  pdays,
+  previous,
+  poutcome,
+  target,
+  CASE 
+  WHEN split_fileds <0.8 THEN 'training'
+  WHEN split_fileds = 0.8 THEN 'evaluation'
+  WHEN split_fileds > 0.8 THEN 'Prediction'
+  END as dataframe
+FROM
+(SELECT age,
+  job,
+  marital,
+  education,
+  'default',
+  balance,
+  housing,
+  loan,
+  contact,
+  day,
+  month,
+  duration,
+  campaign,
+  pdays,
+  previous,
+  poutcome,
+  deposit AS target,
+  ROUND(ABS(RAND()),1) as split_fileds
+  FROM 
+  `nice-forge-338515.Bank_marketing.bank`) ;
+
+
+SELECT dataframe,target ,count(*) from `nice-forge-338515.Bank_marketing.Bank_final` group by 1,2  order by 1,2 ;
+
+CREATE OR REPLACE MODEL `nice-forge-338515.Bank_marketing.Bank_final_model`
+OPTIONS(model_type='LOGISTIC_REG',
+        auto_class_weights=True,
+        input_label_cols=['target']) AS 
+        SELECT * EXCEPT (dataframe) FROM `nice-forge-338515.Bank_marketing.Bank_final` where dataframe='training';
+
+SELECT * FROM ML.TRAINING_INFO(MODEL `Bank_marketing.Bank_final_model`);   
+
+SELECT * FROM ML.FEATURE_INFO(MODEL `Bank_marketing.Bank_final_model`);
+
+SELECT * FROM ML.WEIGHTS(MODEL `Bank_marketing.Bank_final_model`);
+
+SELECT * FROM ML.EVALUATE(MODEL `Bank_marketing.Bank_final_model`,(SELECT  * FROM `Bank_marketing.Bank_final` where dataframe='evaluation'));
+
+SELECT * FROM ML.PREDICT(MODEL `Bank_marketing.Bank_final_model`,(SELECT  * FROM `Bank_marketing.Bank_final` where dataframe='Prediction'));
+
+CREATE OR REPLACE MODEL `nice-forge-338515.Bank_marketing.Bank_final_model_new`
+TRANSFORM(ML.QUANTILE_BUCKETIZE(age,5) OVER () as bucket_size,ML.feature_cross(STRUCT(job,education)) job_eduction,
+marital,
+balance,
+housing,
+loan,
+contact,
+day,
+month,
+pdays,
+previous,
+poutcome,
+target)
+OPTIONS(model_type='LOGISTIC_REG',
+        auto_class_weights=True,
+        input_label_cols=['target']) AS 
+        SELECT * EXCEPT (dataframe,campaign,default_col) FROM `nice-forge-338515.Bank_marketing.Bank_final` where dataframe='training';
+
+
+
