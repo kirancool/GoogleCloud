@@ -1,0 +1,155 @@
+1)	SELECT
+tripduration,
+CURRENT_DATE() as currentdate,
+CURRENT_TIME() as currnettime,
+CURRENT_TIMESTAMP() as currentimestamp, 
+CAST(starttime AS date) as start_time,
+CAST(stoptime as date) as stop_time,
+cast(starttime as STRING) as test,
+count(distinct bikeid) as num_bikes,
+CONCAT(usertype,'-',gender) as CONCAT_test,
+substr(gender,1,1) as gender,
+substr(usertype,1,3) as subscriber,
+ARRAY_AGG(usertype order by  usertype) as avg_type,
+#ARRAY_CONCAT_AGG(bikeid) as bikeid or ARRAY_CONCAT(bikeid), #must be array type need in here
+cast(concat(cast(extract(year from stoptime) as STRING),'-','01','-01') as date) as date,
+date_diff(current_date(),cast(stoptime as date),DAY) as day_stop_time_to_current_time, 
+generate_timestamp_array(TIMESTAMP(DATE_SUB(CURRENT_DATE("GMT"),INTERVAL 2 DAY)),TIMESTAMP(current_date("Australia/Sydney")),INTERVAL 1 HOUR) as days_hour
+FROM `bigquery-public-data.new_york_citibike.citibike_trips`
+where gender='female'
+group by tripduration, starttime,bikeid,CONCAT_test,gender,subscriber,stoptime limit 100;
+
+2)	 
+
+SELECT * FROM `bigquery-public-data.google_analytics_sample.ga_sessions_20170801` LIMIT 1000;
+
+SELECT * FROM `bigquery-public-data.new_york_citibike.citibike_trips` limit 100;
+
+select timestamp(current_datetime("Australia/Sydney"))as now;
+
+SELECT date_diff(current_date(),cast(stoptime as date),DAY) as day_stop_time_to_current_time
+FROM `bigquery-public-data.new_york_citibike.citibike_trips`;
+
+3)	Conver String date to normal date format :    
+SELECT channelGrouping,
+CAST(CONCAT(SUBSTR(date, 0 , 4),'-',SUBSTR(date, 5 , 2),'-',SUBSTR(date, 7 , 2))as DATE )AS date,
+pageview,
+sum(pageview) over (PARTITION BY date) totalpageViews
+FROM(  
+SELECT channelGrouping,
+  date,
+ sum(totals.pageViews) as pageview ,
+  FROM `bigquery-public-data.google_analytics_sample.ga_sessions_20170801` group by channelGrouping,date LIMIT 1000)
+
+4)	Array :
+1)SELECT generate_timestamp_array(TIMESTAMP(DATE_SUB(CURRENT_DATE("GMT"),INTERVAL 2 DAY)),TIMESTAMP(current_date("Australia/Sydney")),INTERVAL 1 HOUR) as days_hour
+        2) SELECT ARRAY<FLOAT64>[1,2,3] AS float;
+        3)SELECT tripduration, ARRAY_AGG(birth_year) AS birth_year, FROM `bigquery-public-data.new_york_citibike.citibike_trips` GROUP BY tripduration LIMIT  10;
+        
+5)	SELECT  GENERATE_DATE_ARRAY(CAST(starttime AS date),CAST(stoptime AS date), INTERVAL 1 DAY) AS date_array FROM   `bigquery-public-data..new_york_citibike.citibike_trips` LIMIT   1000;
+
+
+6)	WITH
+  last_3_days_datetime AS (
+  SELECT
+    generate_timestamp_array(TIMESTAMP(DATE_SUB(CURRENT_DATE("GMT"),INTERVAL 2 DAY)),
+      TIMESTAMP_TRUNC(TIMESTAMP(current_datetime("GMT")),HOUR),
+      INTERVAL 1 HOUR) days_hours),
+  hours_list AS (
+  SELECT
+    datetime(timestamp_hour) starttime
+  FROM
+    last_3_days_datetime,UNNEST(days_hours) as timestamp_hour
+  WHERE
+    datetime_diff(current_datetime("GMT"),
+      datetime(timestamp_hour),
+      HOUR)>=2),
+  hours_list_by AS (
+  SELECT
+    usertype,
+    cast(starttime as date) as starttime
+  FROM
+    hours_list,
+    UNNEST(['subscriber','Consumer']) AS usertype)
+SELECT
+  *
+FROM
+  hours_list_by;
+
+
+7)	select date_sub(current_date("GMT"),INTERVAL 1 DAY) as IND_DAY,date_sub(current_datetime("GMT"),INTERVAL 1 HOUR) as IND_HOUR
+
+8)	SELECT
+  starttime,
+  stoptime
+FROM
+  `bigquery-public-data.new_york_citibike.citibike_trips`
+WHERE
+  UPPER(gender) LIKE UPPER(CONCAT("%",gender,"%"))
+  OR LOWER(gender) LIKE LOWER(CONCAT("%",gender,"%"))
+LIMIT
+  1000;
+9)	SELECT
+  UPPER(gender)
+FROM
+  `bigquery-public-data.new_york_citibike.citibike_trips`
+WHERE
+  gender="male"
+LIMIT
+  100;
+10)	SELECT
+  FORMAT_DATE("%A",starttime) AS week_days,
+  FORMAT_DATE("%C",starttime)AS week_date,
+  FORMAT_DATE("%B",starttime) AS Month
+FROM
+  `bigquery-public-data.new_york_citibike.citibike_trips`
+LIMIT
+  100;
+
+11)	WITH
+  aa AS (
+  SELECT
+    FORMAT_DATE("%A",starttime) AS week_days,
+    COUNT(1) AS numsub,
+    SUM(
+    IF
+      (starttime BETWEEN DATE_SUB(CURRENT_DATE("GMT"),INTERVAL 7 day)
+        AND DATE_SUB(CURRENT_DATE("GMT"),INTERVAL 1 day),
+        1,
+        0)) AS weeks
+  FROM
+    `bigquery-public-data.new_york_citibike.citibike_trips` group by starttime),
+  bb AS (
+  SELECT
+    ARRAY_AGG(STRUCT(week_days))
+  FROM
+    aa
+  LIMIT
+    100 )
+    select * from bb
+
+
+12)	SELECT EXTRACT(DAY FROM current_date('GMT')) AS the_day, EXTRACT(Month FROM current_date('GMT')) AS the_month, EXTRACT(Year FROM current_date('GMT')) AS the_year;
+13)	SELECT extract(DAY FROM CURRENT_DATE("GMT")) AS DAY, FORMAT_DATE('%A', CURRENT_DATE("GMT")) AS TodaysDay,FORMAT_DATE("%B",CURRENT_DATE("GMT")) AS Month
+14)	select FORMAT_DATE('%A', CURRENT_DATE("GMT")) AS TodaysDay
+15)	
+16)	
+17)	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
