@@ -12,6 +12,23 @@ bq_param={
     "balance":balance,	
     "month":month
 }
+or 
+
+age = 46 #@param {type:"slider", min:10, max:80, step:1}
+job="admin." #@param ["admin.","developer"]
+marital ="single" #@param ["single","married"]	
+education	="secondary" #@param ["secondary", "tertiary"]
+balance	="274" #@param {type:"string"}
+month= "apr" #@param {type:"string"}
+bq_param={
+    "age":age,
+    "job":job,
+    "marital":marital,
+    "education":education,	
+    "balance":balance,	
+    "month":month
+}
+
 
 %%bigquery --project nice-forge-338515 df_test --params {bq_param}
 
