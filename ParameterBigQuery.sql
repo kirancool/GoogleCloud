@@ -40,4 +40,14 @@ where day=extract(DAY from current_Date("GMT")) and
    or 
    balance between 3001 and 10000
  )
- group by age,job,marital,education,balance,month
+ group by age,job,marital,education,balance,month;
+ 
+select age as age ,job as job,marital as marital, education as education,
+case when balance>=100 or balance<=1000 then 'low balance'
+     when balance>=1001 or balance <=3000 then 'mid balance'
+     when balance>=3001 or balance <=10000 then 'good balance'
+     end balace,
+     month as month,
+extract(DAY from current_Date("GMT")-1) as day      
+from `nice-forge-338515.Bank_marketing.bank` 
+where day=extract(DAY from current_Date("GMT")) 
