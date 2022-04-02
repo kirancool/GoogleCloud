@@ -46,3 +46,18 @@ query_parameter=[
 job_config.query_parameters=query_parameter                  
 df=client.query(query_test1,job_config=job_config).result().to_dataframe()
 df
+
+
+
+query="""select * from HouseData.House"""
+client = bigquery.Client(project='nice-forge-338515')
+# job_config=bigquery.QueryJobConfig(use_legacy_sql=False)
+# query_parameter=[
+#                  bigquery.ScalarQueryParameter("starttime","DATE",starttime),
+#                  bigquery.ScalarQueryParameter("stoptime","DATE",stoptime),
+#                  bigquery.ScalarQueryParameter("usertype","STRING",usertype)
+#                  ]
+# job_config.query_parameters=query_parameter                  
+#df=client.query(query_test1,job_config=job_config).result().to_dataframe()
+df=client.query(query).result().to_dataframe()
+df
