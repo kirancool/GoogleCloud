@@ -61,3 +61,15 @@ client = bigquery.Client(project='nice-forge-338515')
 #df=client.query(query_test1,job_config=job_config).result().to_dataframe()
 df=client.query(query).result().to_dataframe()
 df
+
+
+client=bigquery.Client()
+df=client.dataset("datasetname",project="projectname")
+df1=df.table("tablename")
+df2=client.get_table(df1)
+df3=client.list_rows(df2).to_dataframe()
+
+**************store and procedure***********
+query=""" call `abc_api`()"""
+client=bigquery.Client(project="")
+url=client.query(query)
