@@ -159,7 +159,8 @@ select name,location,food.price as price_range,country from `test.struct_demo`, 
 SELECT  * FROM `bigquery-public-data.google_analytics_sample.ga_sessions_20170801` LIMIT 1000;
 
 select hits[offset(0)] as hits, hits[offset(0)].page.pageTitle as pageTitle from `bigquery-public-data.google_analytics_sample.ga_sessions_20170801` LIMIT 1000;
-
+18) Array out of index error got in offset then use safe_offset
+select hits[offset(0)] as hits, hits[offset(0)].page.pageTitle as pageTitle ,hits[offset(0)].product[SAFE_OFFSET(0)].productSKU as productSKU from `bigquery-public-data.google_analytics_sample.ga_sessions_20170801` LIMIT 1000;
 
 
 
