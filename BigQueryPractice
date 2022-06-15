@@ -133,8 +133,32 @@ LIMIT
 13)	SELECT extract(DAY FROM CURRENT_DATE("GMT")) AS DAY, FORMAT_DATE('%A', CURRENT_DATE("GMT")) AS TodaysDay,FORMAT_DATE("%B",CURRENT_DATE("GMT")) AS Month
 14)	select FORMAT_DATE('%A', CURRENT_DATE("GMT")) AS TodaysDay
 15)	
+BigQuery Nested and Repeated 
 16)	
-17)	
+create or replace table `test.demo` as(select 'cafe pacific' as name ,'new york' as location,['indian','marathi'] as food
+union all 
+select 'boston pizza' as name,'toranto' as location,['indian','chines','maggi'] as food);
+
+select * from `test.demo`;
+
+select name,location,food from `test.demo`, unnest(food) as food;
+
+select name,ARRAY_LENGTH(food) as food from `test.demo`;
+
+select * from  `test.demo` where 'marathi' in unnest(food);
+
+create or replace table `test.struct_demo` as (select 'cafe pacific' as name ,'new york' as location,STRUCT(['indian','marathi'] as food_country,'100$' as price) as food
+union all 
+select 'boston pizza' as name,'toranto' as location,Struct(['indian','chines','maggi'] as food_country,'200$' as price) as food);
+
+select * from `test.struct_demo`;
+
+select name,location,food.price as price_range,country from `test.struct_demo`, unnest(food.food_country) as country;
+
+17)	Nested and repeated inside again nested and repeated query 
+SELECT  * FROM `bigquery-public-data.google_analytics_sample.ga_sessions_20170801` LIMIT 1000;
+
+select hits[offset(0)] as hits, hits[offset(0)].page.pageTitle as pageTitle from `bigquery-public-data.google_analytics_sample.ga_sessions_20170801` LIMIT 1000;
 
 
 
